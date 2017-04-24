@@ -1,44 +1,65 @@
 <project name="HelloWorld" basedir="." default="main">
+    <presetdef name="my.javac">
+       <javac includeantruntime="false" />
+    </presetdef>
 
     <property name="src.dir"     value="src"/>
 
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
-    <property name="report.dir"  value="test"/>
+    <property name="report.dir"  value="${build.dir}/junitreport"/>
     <property name="main-class"  value="oata.HelloWorld"/>
 
-    <path id="junit_classpath">
-        <pathelement path="lib/junit.jar"/>
+    <property name="lib.dir"     value="lib"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
     </target>
 
-    <target name="junit" depends="compile">
-
-    <junit printsummary="yes" haltonfailure="no">
-
-
-            <classpath>
-                <path refid="junit_classpath"/>
-            </classpath>
-
-	<test name="${main-class}"
-		haltonfailure="no" todir="${report.dir}">
-		<formatter type="plain" />
-		<formatter type="xml" />
-	</test>
-
-    </junit>
+    <target name="junitreport">
+        <junitreport todir="${report.dir}">
+            <fileset dir="${report.dir}" includes="TEST-*.xml"/>
+            <report todir="${report.dir}"/>
+        </junitreport>
     </target>
 
-    <target name="compile">
+   <target name="compile">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
+        <my.javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
     </target>
 
+ <path id="application" location="${jar.dir}/${ant.project.name}.jar"/>
+
+    <target name="run" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <classpath>
+                <path refid="classpath"/>
+                <path refid="application"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="junit" depends="jar">
+        <mkdir dir="${report.dir}"/>
+        <junit printsummary="yes">
+            <classpath>
+                <path refid="classpath"/>
+                <path refid="application"/>
+            </classpath>
+            
+            <formatter type="xml"/>
+            
+            <batchtest fork="yes" todir="${report.dir}">
+                <fileset dir="${src.dir}" includes="*Test.java"/>
+            </batchtest>
+        </junit>
+    </target>
+    
     <target name="jar" depends="compile">
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
@@ -46,10 +67,6 @@
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
         </jar>
-    </target>
-
-    <target name="run" depends="jar">
-        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
     </target>
 
     <target name="clean-build" depends="clean,jar"/>
