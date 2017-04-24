@@ -5,13 +5,33 @@
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
-
+    <property name="report.dir"  value="test"/>
     <property name="main-class"  value="oata.HelloWorld"/>
 
-
+    <path id="junit_classpath">
+        <pathelement path="lib/junit.jar"/>
+    </path>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="junit" depends="compile">
+
+    <junit printsummary="yes" haltonfailure="no">
+
+
+            <classpath>
+                <path refid="junit_classpath"/>
+            </classpath>
+
+	<test name="${main-class}"
+		haltonfailure="no" todir="${report.dir}">
+		<formatter type="plain" />
+		<formatter type="xml" />
+	</test>
+
+    </junit>
     </target>
 
     <target name="compile">
