@@ -7,3 +7,9 @@ https://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html
 
 
 clone from git@github.com:Silverpop/sample-helloworld-ant.git
+
+
+## please download dependent libaraies to /lib
+lib
+│   ├── junit-4.11.jar
+│   └── log4j-1.2.17.jar
